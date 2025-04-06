@@ -1,0 +1,28 @@
+.updates {
+    background-color: hsl(0, 13%, 9%);
+    color: white;
+    text-align: center;
+}
+
+.notification-container {
+    display: flex;
+    padding: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.notification-item {
+    border-radius: 8px;
+    padding: 20px;
+    width: 250px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.notification-description a {
+    color: white;
+}
