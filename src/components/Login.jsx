@@ -1,83 +1,36 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import React from "react";
+import { FcGoogle } from "react-icons/fc";
+import "./css/Login.css"; // Your custom styles
+import Footer from "./pageComponents/Footer";
+import Header from "./pageComponents/Header";
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+const loginWithGoogle = () => {
+  window.location.href = 'http://localhost:8080/api/v1/user/oauth2/authorization/google';
+};
 
-  async function login(event) {
-    event.preventDefault();
-    try {
-      await axios
-        .post("http://localhost:8080/api/v1/user/login", {
-          email: email,
-          password: password,
-        })
-        .then((res) => {
-          console.log(res.data);
-
-          if (res.data.message === "Email not exists") {
-            alert("Email not exists");
-          } else if (res.data.message === "Login Success") {
-            navigate("/home");
-          } else {
-            alert("Incorrect Email or Password");
-          }
-        })
-        .catch((fail) => {
-          console.error(fail); // Error!
-        });
-    } catch (err) {
-      alert(err);
-    }
-  }
-
+const Login = () => {
   return (
-    <div className="container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="card p-4" style={{ width: "400px" }}>
-        <div className="card-body">
-          <div className="text-center mb-4">
-            <h2>Login</h2>
-            <hr />
+    <>
+      <Header />
+      <div className="container d-flex justify-content-center align-items-center min-vh-100">
+        <div className="card p-4" style={{ width: "400px" }}>
+          <div className="card-body text-center">
+            <h2 className="mb-3">Login</h2>
+            <p className="mb-4">Sign in to access your dashboard</p>
+
+            <button
+              className="btn btn-outline-dark d-flex align-items-center justify-content-center w-100"
+              onClick={loginWithGoogle}
+            >
+              <FcGoogle size={24} className="me-2" />
+              Sign in with Google
+            </button>
           </div>
-
-          <form>
-            <div className="form-group mb-3">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                id="email"
-                placeholder="Enter Email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </div>
-
-            <div className="form-group mb-3">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                className="form-control"
-                id="password"
-                placeholder="Enter Password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
-
-            <div className="d-grid">
-              <button type="submit" className="btn btn-primary" onClick={login}>
-                Login
-              </button>
-            </div>
-          </form>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
-}
+};
 
 export default Login;

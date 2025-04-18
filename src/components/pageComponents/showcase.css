@@ -1,0 +1,162 @@
+/* Showcase Section */
+.showcase {
+    background-color: hsl(0, 13%, 9%);
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.services-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 30px;
+}
+
+/* Individual Service Card */
+.service-item {
+    background-color: hsl(0, 9%, 15%);
+    border: 1px solid hsl(31, 70%, 40%);
+    border-radius: 12px;
+    padding: 24px;
+    width: 260px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.service-item:hover {
+    transform: translateY(-6px) scale(1.02);
+    background-color: hsl(0, 0%, 12%);
+    border-color: hsl(0, 0%, 87%);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+.icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 12px;
+    filter: invert(84%) sepia(28%) saturate(1586%) hue-rotate(1deg) brightness(98%) contrast(91%);
+}
+
+.service-item h4 {
+    font-size: 1.6em;
+    margin-bottom: 10px;
+    color: hsl(31, 70%, 50%);
+}
+
+.service-description {
+    font-size: 16px;
+    color: hsl(31, 70%, 80%);
+}
+
+/* Dashboard Styles */
+.dashboard-page {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f0f2f5;
+    padding: 40px 20px;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: auto;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* User Info Section */
+.user-info {
+    background-color: #f9f9f9;
+    padding: 24px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.user-info h2 {
+    margin-bottom: 10px;
+    font-size: 28px;
+    color: #222;
+}
+
+.user-details p {
+    font-size: 16px;
+    color: #555;
+    margin: 4px 0;
+}
+
+/* Dashboard Actions */
+.dashboard-actions {
+    margin-top: 30px;
+}
+
+.dashboard-actions h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+.action-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Action Cards */
+.action-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 250px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.action-card h4 {
+    font-size: 20px;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.action-card p {
+    font-size: 14px;
+    color: #666;
+}
+
+.action-card a {
+    margin-top: 10px;
+    display: inline-block;
+    color: #007BFF;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.action-card a:hover {
+    color: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .action-cards {
+        flex-direction: column;
+    }
+
+    .action-card {
+        width: 100%;
+    }
+}

@@ -1,6 +1,6 @@
-import Header from "./Header";
-import Showcase from "./Showcase";
-import Footer from "./Footer";
+import Header from "./pageComponents/Header";
+import Showcase from "./pageComponents/Showcase";
+import Footer from "./pageComponents/Footer";
 
 function Landing() {
     return(

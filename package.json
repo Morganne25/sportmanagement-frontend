@@ -11,10 +11,20 @@
     "start": "vite"
   },
   "dependencies": {
+    "@date-io/dayjs": "^3.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "@mui/x-date-pickers": "^7.28.3",
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "react": "^19.0.0",
+    "react-big-calendar": "^1.18.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.4.0",
     "sportmanagement-frontend": "file:"
   },
