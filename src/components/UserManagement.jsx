@@ -1,31 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  IconButton,
-  Snackbar,
-  Alert,
-  CircularProgress,
-  Typography,
-  Container,
-  Box,
-  Grid
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle,
+  MenuItem, Select, InputLabel, FormControl, IconButton, Snackbar, Alert,
+  CircularProgress, Typography, Container, Box, Grid
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 import Header from './pageComponents/Header';
@@ -42,26 +21,14 @@ function UserManagement() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-  const [newUser, setNewUser] = useState({
-    name: '',
-    email: '',
-    role: 'member',
-    status: 'active'
-  });
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'member', status: 'active' });
   const [validationErrors, setValidationErrors] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
-  // Get user data from localStorage
-  const getUserData = () => {
-    const userData = localStorage.getItem('userData');
-    return userData ? JSON.parse(userData) : null;
-  };
-
-  // Check if current user is admin
   useEffect(() => {
-    const userData = getUserData();
-    if (userData && userData.role === 'admin') {
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    if (userData?.role === 'admin') {
       setIsAdmin(true);
       fetchUsers();
     } else {
@@ -74,9 +41,9 @@ function UserManagement() {
       setLoading(true);
       const response = await axios.get(`${API_BASE_URL}/all`);
       setUsers(response.data);
-      setLoading(false);
     } catch (error) {
       showSnackbar('Failed to fetch users', 'error');
+    } finally {
       setLoading(false);
     }
   };
@@ -94,44 +61,28 @@ function UserManagement() {
   };
 
   const startEvent = () => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can access event management', 'error');
-      return;
-    }
+    if (!isAdmin) return showSnackbar('Only admins can access event management', 'error');
     navigate('/events-management');
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const handleInputChange = ({ target: { name, value } }) => {
     setNewUser(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
+  const handleEditInputChange = ({ target: { name, value } }) => {
     setCurrentUser(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAddUser = async () => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can add users', 'error');
-      return;
-    }
+    if (!isAdmin) return showSnackbar('Only admins can add users', 'error');
 
     const errors = validateForm(newUser);
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-    
+    if (Object.keys(errors).length) return setValidationErrors(errors);
+
     try {
       await axios.post(`${API_BASE_URL}/register`, newUser);
       showSnackbar('User added successfully', 'success');
-      setNewUser({
-        name: '',
-        email: '',
-        role: 'member',
-        status: 'active'
-      });
+      setNewUser({ name: '', email: '', role: 'member', status: 'active' });
       setOpenAddDialog(false);
       fetchUsers();
     } catch (error) {
@@ -140,27 +91,18 @@ function UserManagement() {
   };
 
   const handleEditUser = (user) => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can edit users', 'error');
-      return;
-    }
+    if (!isAdmin) return showSnackbar('Only admins can edit users', 'error');
     setCurrentUser({ ...user });
     setValidationErrors({});
     setOpenEditDialog(true);
   };
 
   const handleUpdateUser = async () => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can update users', 'error');
-      return;
-    }
+    if (!isAdmin) return showSnackbar('Only admins can update users', 'error');
 
     const errors = validateForm(currentUser);
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-    
+    if (Object.keys(errors).length) return setValidationErrors(errors);
+
     try {
       await axios.put(`${API_BASE_URL}`, currentUser);
       setOpenEditDialog(false);
@@ -172,19 +114,15 @@ function UserManagement() {
   };
 
   const handleDeleteUser = async (id) => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can delete users', 'error');
-      return;
-    }
+    if (!isAdmin) return showSnackbar('Only admins can delete users', 'error');
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
 
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await axios.delete(`${API_BASE_URL}/${id}`);
-        showSnackbar('User deleted successfully', 'success');
-        fetchUsers();
-      } catch (error) {
-        showSnackbar(error.response?.data?.message || 'Failed to delete user', 'error');
-      }
+    try {
+      await axios.delete(`${API_BASE_URL}/${id}`);
+      showSnackbar('User deleted successfully', 'success');
+      fetchUsers();
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || 'Failed to delete user', 'error');
     }
   };
 
@@ -202,23 +140,23 @@ function UserManagement() {
 
   if (!isAdmin) {
     return (
-      <Container maxWidth="lg">
+      <>
         <Header />
-        <Box mt={5} textAlign="center">
-          <Typography variant="h4" color="error">
-            Access Denied
-          </Typography>
-          <Typography variant="body1">
-            You must be an administrator to access this page.
-          </Typography>
-        </Box>
-      </Container>
+        <Container maxWidth="lg">
+          <Box mt={5} textAlign="center">
+            <Typography variant="h4" color="error">Access Denied</Typography>
+            <Typography variant="body1">You must be an administrator to access this page.</Typography>
+          </Box>
+        </Container>
+      </>
     );
   }
 
   return (
-    <Container maxWidth="lg">
+   <>
       <Header />
+    <Container maxWidth="lg">
+    
       <Typography variant="h4" gutterBottom style={{ margin: '20px 0', color: '#1976d2', textAlign: 'center' }}>
         User Management
       </Typography>
@@ -464,7 +402,9 @@ function UserManagement() {
         </Alert>
       </Snackbar>
     </Container>
+    </>
   );
+
 }
 
 export default UserManagement;

@@ -25,7 +25,7 @@ function Navbar() {
                     {user?.role === 'Admin' && (
                         <li><a href="/management">Admin management</a></li>
                     )}
-                    
+                    <li><a href="/Dashboard">Dashboard</a></li>
                     <li><a href="/report">Maintenance Report</a></li>
                     <li><a href="/about">About</a></li>
 

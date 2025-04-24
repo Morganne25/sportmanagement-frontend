@@ -24,11 +24,10 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
-  Box,
   Grid,
   Chip
 } from '@mui/material';
-import { Add, Edit, Delete, DateRange } from '@mui/icons-material';
+import { Add, Edit, Delete } from '@mui/icons-material';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1/events';
 
@@ -37,30 +36,27 @@ function EventsManagement() {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    eventType: 'TOURNAMENT',
+    startDate: '',
+    endDate: '',
+    location: '',
+    status: 'UPCOMING'
+  });
+  const [errors, setErrors] = useState({});
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success'
   });
-  const [newEvent, setNewEvent] = useState({
-    title: '',
-    description: '',
-    eventType: 'tournament',
-    startDate: '',
-    endDate: '',
-    location: '',
-    status: 'upcoming'
-  });
-  const [errors, setErrors] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if user is admin from localStorage
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
-    const adminStatus = userData?.role === 'admin';
-    setIsAdmin(adminStatus);
-    
-    if (adminStatus) {
+    if (userData?.role === 'admin') {
+      setIsAdmin(true);
       fetchEvents();
     }
   }, []);
@@ -70,9 +66,10 @@ function EventsManagement() {
       setLoading(true);
       const response = await axios.get(API_BASE_URL);
       setEvents(response.data);
-      setLoading(false);
     } catch (error) {
-      showSnackbar('Failed to fetch events', 'error');
+      const message = error.response?.data?.message || 'Failed to fetch events';
+      setSnackbar({ open: true, message, severity: 'error' });
+    } finally {
       setLoading(false);
     }
   };
@@ -80,11 +77,13 @@ function EventsManagement() {
   const validateEvent = (event) => {
     const newErrors = {};
     if (!event.title.trim()) newErrors.title = 'Title is required';
+    if (event.title.trim().length > 100) newErrors.title = 'Title must be less than 100 characters';
     if (!event.description.trim()) newErrors.description = 'Description is required';
+    if (event.description.trim().length > 500) newErrors.description = 'Description must be less than 500 characters';
     if (!event.eventType) newErrors.eventType = 'Event type is required';
     if (!event.startDate) newErrors.startDate = 'Start date is required';
     if (!event.endDate) newErrors.endDate = 'End date is required';
-    if (new Date(event.endDate) < new Date(event.startDate)) {
+    if (event.startDate && event.endDate && new Date(event.endDate) < new Date(event.startDate)) {
       newErrors.endDate = 'End date must be after start date';
     }
     return newErrors;
@@ -93,89 +92,89 @@ function EventsManagement() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (currentEvent) {
-      setCurrentEvent(prev => ({ ...prev, [name]: value }));
+      setCurrentEvent((prev) => ({ ...prev, [name]: value }));
     } else {
-      setNewEvent(prev => ({ ...prev, [name]: value }));
+      setNewEvent((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleOpenCreate = () => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can create events', 'error');
-      return;
-    }
-    setCurrentEvent(null);
-    setErrors({});
-    setOpenDialog(true);
-  };
-
-  const handleOpenEdit = (event) => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can edit events', 'error');
-      return;
-    }
-    setCurrentEvent({ ...event });
-    setErrors({});
-    setOpenDialog(true);
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16);
   };
 
   const handleSubmit = async () => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can manage events', 'error');
-      return;
-    }
-
     const eventToValidate = currentEvent || newEvent;
     const validationErrors = validateEvent(eventToValidate);
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
+    const eventData = {
+      title: eventToValidate.title,
+      description: eventToValidate.description,
+      eventType: eventToValidate.eventType,
+      startDate: eventToValidate.startDate,
+      endDate: eventToValidate.endDate,
+      location: eventToValidate.location,
+      status: eventToValidate.status
+    };
+
     try {
       if (currentEvent) {
-        await axios.put(`${API_BASE_URL}/${currentEvent.id}`, currentEvent);
-        showSnackbar('Event updated successfully', 'success');
+        await axios.put(`${API_BASE_URL}/${currentEvent.id}`, eventData);
+        setSnackbar({ open: true, message: 'Event updated successfully', severity: 'success' });
       } else {
-        await axios.post(API_BASE_URL, newEvent);
-        showSnackbar('Event created successfully', 'success');
+        await axios.post(API_BASE_URL, eventData);
+        setSnackbar({ open: true, message: 'Event created successfully', severity: 'success' });
         setNewEvent({
           title: '',
           description: '',
-          eventType: 'tournament',
+          eventType: 'TOURNAMENT',
           startDate: '',
           endDate: '',
           location: '',
-          status: 'upcoming'
+          status: 'UPCOMING'
         });
       }
-      setOpenDialog(false);
       fetchEvents();
+      setOpenDialog(false);
     } catch (error) {
-      showSnackbar(error.response?.data?.message || 'Operation failed', 'error');
+      const message = error.response?.data?.message || 'Error during event submission';
+      setSnackbar({ open: true, message, severity: 'error' });
     }
   };
 
   const handleDelete = async (id) => {
-    if (!isAdmin) {
-      showSnackbar('Only admins can delete events', 'error');
-      return;
-    }
-
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
         await axios.delete(`${API_BASE_URL}/${id}`);
-        showSnackbar('Event deleted successfully', 'success');
+        setSnackbar({ open: true, message: 'Event deleted successfully', severity: 'success' });
         fetchEvents();
       } catch (error) {
-        showSnackbar('Failed to delete event', 'error');
+        const message = error.response?.data?.message || 'Failed to delete event';
+        setSnackbar({ open: true, message, severity: 'error' });
       }
     }
   };
 
-  const showSnackbar = (message, severity) => {
-    setSnackbar({ open: true, message, severity });
+  const handleOpenEdit = (event) => {
+    setCurrentEvent({
+      ...event,
+      startDate: formatDateForInput(event.startDate),
+      endDate: formatDateForInput(event.endDate)
+    });
+    setErrors({});
+    setOpenDialog(true);
+  };
+
+  const handleOpenCreate = () => {
+    setCurrentEvent(null);
+    setErrors({});
+    setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
@@ -183,48 +182,46 @@ function EventsManagement() {
     setErrors({});
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   if (!isAdmin) {
     return (
       <Container maxWidth="lg">
-        <Box mt={5} textAlign="center">
-          <Typography variant="h4" color="error">
-            Access Denied
-          </Typography>
-          <Typography variant="body1">
-            You must be an administrator to access this page.
-          </Typography>
-        </Box>
+        <Typography variant="h4" color="error" align="center" mt={5}>
+          Access Denied: Only admins can manage events
+        </Typography>
       </Container>
     );
   }
 
   return (
     <Container maxWidth="lg">
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" gutterBottom>
-          Events & Notifications
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Add />}
-          onClick={handleOpenCreate}
-        >
-          Create Event
-          </Button>
-      </Box>
-
+      <Typography variant="h4" gutterBottom>
+        Event Management
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Add />}
+        onClick={handleOpenCreate}
+        sx={{ mb: 2 }}
+      >
+        Create New Event
+      </Button>
+      
       <Paper elevation={3}>
         <TableContainer>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: 'primary.main' }}>
-                <TableCell sx={{ color: 'white' }}>Title</TableCell>
-                <TableCell sx={{ color: 'white' }}>Type</TableCell>
-                <TableCell sx={{ color: 'white' }}>Dates</TableCell>
-                <TableCell sx={{ color: 'white' }}>Location</TableCell>
-                <TableCell sx={{ color: 'white' }}>Status</TableCell>
-                <TableCell sx={{ color: 'white' }}>Actions</TableCell>
+              <TableRow>
+                <TableCell>Title</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Dates</TableCell>
+                <TableCell>Location</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -237,63 +234,34 @@ function EventsManagement() {
               ) : events.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    No events found
+                    No events available
                   </TableCell>
                 </TableRow>
               ) : (
                 events.map((event) => (
-                  <TableRow key={event.id} hover>
+                  <TableRow key={event.id}>
+                    <TableCell>{event.title}</TableCell>
                     <TableCell>
-                      <Typography fontWeight="bold">{event.title}</Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {event.description.substring(0, 50)}...
-                      </Typography>
+                      <Chip label={event.eventType} color="primary" />
                     </TableCell>
                     <TableCell>
-                      <Chip 
-                        label={event.eventType} 
-                        color={
-                          event.eventType === 'tournament' ? 'primary' : 
-                          event.eventType === 'meeting' ? 'secondary' : 'default'
-                        } 
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center">
-                        <DateRange color="action" sx={{ mr: 1 }} />
-                        <div>
-                          <Typography variant="body2">
-                            {new Date(event.startDate).toLocaleDateString()}
-                          </Typography>
-                          <Typography variant="body2">
-                            to {new Date(event.endDate).toLocaleDateString()}
-                          </Typography>
-                        </div>
-                      </Box>
+                      {new Date(event.startDate).toLocaleString()} - {new Date(event.endDate).toLocaleString()}
                     </TableCell>
                     <TableCell>{event.location || 'Online'}</TableCell>
                     <TableCell>
                       <Chip 
                         label={event.status} 
                         color={
-                          event.status === 'upcoming' ? 'warning' : 
-                          event.status === 'ongoing' ? 'success' : 'error'
+                          event.status === 'UPCOMING' ? 'warning' : 
+                          event.status === 'ONGOING' ? 'primary' : 'success'
                         } 
                       />
                     </TableCell>
                     <TableCell>
-                      <IconButton 
-                        color="primary" 
-                        onClick={() => handleOpenEdit(event)}
-                        aria-label="edit"
-                      >
+                      <IconButton onClick={() => handleOpenEdit(event)} aria-label="edit">
                         <Edit />
                       </IconButton>
-                      <IconButton 
-                        color="error" 
-                        onClick={() => handleDelete(event.id)}
-                        aria-label="delete"
-                      >
+                      <IconButton onClick={() => handleDelete(event.id)} aria-label="delete">
                         <Delete />
                       </IconButton>
                     </TableCell>
@@ -307,35 +275,33 @@ function EventsManagement() {
 
       {/* Event Form Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
-        <DialogTitle>
-          {currentEvent ? 'Edit Event' : 'Create New Event'}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={3}>
+        <DialogTitle>{currentEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField
+                label="Title"
                 fullWidth
-                label="Event Title"
                 name="title"
                 value={currentEvent?.title || newEvent.title}
                 onChange={handleInputChange}
                 error={!!errors.title}
                 helperText={errors.title}
-                required
+                inputProps={{ maxLength: 100 }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth
                 label="Description"
-                name="description"
+                fullWidth
                 multiline
                 rows={4}
+                name="description"
                 value={currentEvent?.description || newEvent.description}
                 onChange={handleInputChange}
                 error={!!errors.description}
                 helperText={errors.description}
-                required
+                inputProps={{ maxLength: 500 }}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -346,59 +312,15 @@ function EventsManagement() {
                   value={currentEvent?.eventType || newEvent.eventType}
                   onChange={handleInputChange}
                   label="Event Type"
-                  required
                 >
-                  <MenuItem value="tournament">Tournament</MenuItem>
-                  <MenuItem value="meeting">Meeting</MenuItem>
-                  <MenuItem value="workshop">Workshop</MenuItem>
-                  <MenuItem value="social">Social Event</MenuItem>
+                  <MenuItem value="TOURNAMENT">Tournament</MenuItem>
+                  <MenuItem value="MEETING">Meeting</MenuItem>
+                  <MenuItem value="WORKSHOP">Workshop</MenuItem>
                 </Select>
-                {errors.eventType && (
-                  <Typography variant="caption" color="error">
-                    {errors.eventType}
-                  </Typography>
-                )}
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Location"
-                name="location"
-                value={currentEvent?.location || newEvent.location}
-                onChange={handleInputChange}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Start Date"
-                name="startDate"
-                type="datetime-local"
-                InputLabelProps={{ shrink: true }}
-                value={currentEvent?.startDate || newEvent.startDate}
-                onChange={handleInputChange}
-                error={!!errors.startDate}
-                helperText={errors.startDate}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="End Date"
-                name="endDate"
-                type="datetime-local"
-                InputLabelProps={{ shrink: true }}
-                value={currentEvent?.endDate || newEvent.endDate}
-                onChange={handleInputChange}
-                error={!!errors.endDate}
-                helperText={errors.endDate}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!errors.status}>
                 <InputLabel>Status</InputLabel>
                 <Select
                   name="status"
@@ -406,38 +328,71 @@ function EventsManagement() {
                   onChange={handleInputChange}
                   label="Status"
                 >
-                  <MenuItem value="upcoming">Upcoming</MenuItem>
-                  <MenuItem value="ongoing">Ongoing</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                  <MenuItem value="UPCOMING">Upcoming</MenuItem>
+                  <MenuItem value="ONGOING">Ongoing</MenuItem>
+                  <MenuItem value="COMPLETED">Completed</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Start Date & Time"
+                type="datetime-local"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                name="startDate"
+                value={currentEvent?.startDate || newEvent.startDate}
+                onChange={handleInputChange}
+                error={!!errors.startDate}
+                helperText={errors.startDate}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="End Date & Time"
+                type="datetime-local"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                name="endDate"
+                value={currentEvent?.endDate || newEvent.endDate}
+                onChange={handleInputChange}
+                error={!!errors.endDate}
+                helperText={errors.endDate}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Location"
+                fullWidth
+                name="location"
+                value={currentEvent?.location || newEvent.location}
+                onChange={handleInputChange}
+              />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button 
-            onClick={handleSubmit} 
-            color="primary" 
-            variant="contained"
-          >
-            {currentEvent ? 'Update Event' : 'Create Event'}
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary" variant="contained">
+            {currentEvent ? 'Save Changes' : 'Create Event'}
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar for feedback */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
