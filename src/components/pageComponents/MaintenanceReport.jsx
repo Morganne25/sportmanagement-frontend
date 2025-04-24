@@ -12,12 +12,12 @@ import { useNavigate } from 'react-router-dom';
 const MaintenanceReport = () => {
   const [reports, setReports] = useState([]);
   const [description, setDescription] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [currentReport, setCurrentReport] = useState(null);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const [currentReport, setCurrentReport] = useState(null);
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
@@ -38,11 +38,9 @@ const MaintenanceReport = () => {
       setLoading(true);
       const res = await axios.get(apiBase);
       const allReports = res.data || [];
-
       const visibleReports = user.role === 'Admin'
         ? allReports
         : allReports.filter(r => r.createdBy === user.id);
-
       setReports(visibleReports);
     } catch (err) {
       console.error(err);
@@ -53,15 +51,13 @@ const MaintenanceReport = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchReports();
-    }
+    if (user) fetchReports();
   }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${apiBase}?name=${user.name}`, {
+      const res = await axios.post(`${apiBase}?email=${user.email}`, {
         description,
         status: 'Open'
       });
@@ -76,7 +72,7 @@ const MaintenanceReport = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const res = await axios.put(`${apiBase}/${id}/status?name=${user.email}`, {
+      const res = await axios.put(`${apiBase}/${id}/status?email=${user.email}`, {
         status: newStatus
       });
       setReports(reports.map(r => r.id === id ? res.data : r));
@@ -89,7 +85,7 @@ const MaintenanceReport = () => {
 
   const handleFeedbackSubmit = async () => {
     try {
-      const res = await axios.put(`${apiBase}/${currentReport.id}/feedback?name=${user.email}`, {
+      const res = await axios.put(`${apiBase}/${currentReport.id}/feedback?email=${user.email}`, {
         feedback
       });
       setReports(reports.map(r => r.id === currentReport.id ? res.data : r));
@@ -118,9 +114,7 @@ const MaintenanceReport = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>Maintenance Reports</Typography>
-
-      {/* Notifications */}
+      {/* Alerts */}
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError('')}>
         <Alert severity="error">{error}</Alert>
       </Snackbar>
@@ -158,14 +152,18 @@ const MaintenanceReport = () => {
               <TableCell>Description</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Feedback</TableCell>
-              <TableCell>Actions</TableCell>
+              {user.role === 'Admin' && <TableCell>Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} align="center">Loading...</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={5} align="center">Loading...</TableCell>
+              </TableRow>
             ) : reports.length === 0 ? (
-              <TableRow><TableCell colSpan={5} align="center">No reports found.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={5} align="center">No reports found.</TableCell>
+              </TableRow>
             ) : (
               reports.map(report => (
                 <TableRow key={report.id}>
@@ -176,6 +174,7 @@ const MaintenanceReport = () => {
                       <Select
                         value={report.status}
                         onChange={(e) => handleStatusChange(report.id, e.target.value)}
+                        disabled={report.status === 'Completed' && user.role !== 'Admin'}
                       >
                         {statusOptions.map(status => (
                           <MenuItem key={status} value={status}>{status}</MenuItem>
@@ -184,18 +183,20 @@ const MaintenanceReport = () => {
                     </FormControl>
                   </TableCell>
                   <TableCell>{report.feedback || '—'}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => {
-                      setCurrentReport(report);
-                      setFeedback(report.feedback || '');
-                      setFeedbackDialogOpen(true);
-                    }}>
-                      <Comment color="primary" />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(report.id)}>
-                      <Delete color="error" />
-                    </IconButton>
-                  </TableCell>
+                  {user.role === 'Admin' && (
+                    <TableCell>
+                      <IconButton onClick={() => {
+                        setCurrentReport(report);
+                        setFeedback(report.feedback || '');
+                        setFeedbackDialogOpen(true);
+                      }}>
+                        <Comment color="primary" />
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(report.id)}>
+                        <Delete color="error" />
+                      </IconButton>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
@@ -223,7 +224,6 @@ const MaintenanceReport = () => {
         </DialogActions>
       </Dialog>
     </Box>
-
   );
 };
 

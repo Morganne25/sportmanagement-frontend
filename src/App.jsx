@@ -10,13 +10,15 @@ import UserManagement from "./components/UserManagement";
 import LoginSuccess from "./components/LoginSuccess";
 import { AuthProvider } from "./components/auth/AuthContext";
 import Dashboard from "./components/Dashboard";
+import EventsManagement from "./components/EventsManagement";
+import NotFound from "./components/NotFound"; // Import the new component
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider> {/* ✅ Now it's inside BrowserRouter */}
+      <AuthProvider>
         <Routes>
-          <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<Register />} />
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Landing />} />
           <Route path="/facilities" element={<FacilitiesPage />} />
@@ -25,7 +27,10 @@ function App() {
           <Route path="/management" element={<UserManagement />} />
           <Route path="/login" element={<Login />} />
           <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/events-management" element={<EventsManagement />} />
           <Route path="/login/success" element={<LoginSuccess />} />
+          {/* Add this catch-all route at the end */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

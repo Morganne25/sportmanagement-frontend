@@ -21,8 +21,12 @@ function Navbar() {
             <h1><a href="/">APP</a></h1>
             <nav className="navbar">
                 <ul>
-                    <li><a href="/report">Report</a></li>
-     
+                    {/* Afficher seulement pour les admins */}
+                    {user?.role === 'Admin' && (
+                        <li><a href="/management">Admin management</a></li>
+                    )}
+                    
+                    <li><a href="/report">Maintenance Report</a></li>
                     <li><a href="/about">About</a></li>
 
                     {!user ? (
