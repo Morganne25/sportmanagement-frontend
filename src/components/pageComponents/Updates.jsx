@@ -46,6 +46,7 @@ function Updates() {
   };
 
   // Get only the first 3 upcoming events
+  
   const latestEvents = events.slice(0, 3);
 
   return (
