@@ -1,4 +1,4 @@
-// src/components/Showcase.jsx
+// ./src/components/Showcase.jsx
 import React from 'react';
 import Updates from './Updates';
 import './showcase.css';
@@ -9,31 +9,31 @@ const facilities = [
     key: 'soccer',
     name: 'Soccer Fields',
     description: 'We have 2 soccer fields available for rent. Each field is 100 yards long and 50 yards wide.',
-    icon: 'src/assets/futbol-regular.svg'
+    icon: './src/assets/futbol-regular.svg'
   },
   {
     key: 'basketball',
     name: 'Basketball Courts',
     description: 'We have 2 basketball courts available for rent. Each court is 94 feet long.',
-    icon: 'src/assets/basketball-solid.svg'
+    icon: './src/assets/basketball-solid.svg'
   },
   {
     key: 'swimming',
     name: 'Swimming Pools',
     description: 'We have 2 swimming pools available for rent. Each pool is 25 yards long.',
-    icon: 'src/assets/person-swimming-solid.svg'
+    icon: './src/assets/person-swimming-solid.svg'
   },
   {
     key: 'gym',
     name: 'Gym',
     description: 'We have a fully equipped gym available for rent. Our gym has a variety of equipment.',
-    icon: 'src/assets/dumbbell-solid.svg'
+    icon: './src/assets/dumbbell-solid.svg'
   },
   {
     key: 'table-tennis',
     name: 'Table Tennis',
     description: 'We have 2 table tennis tables available for rent. Each table is 9 feet long.',
-    icon: 'src/assets/table-tennis-paddle-ball-solid.svg'
+    icon: './src/assets/table-tennis-paddle-ball-solid.svg'
   }
 ];
 
