@@ -1,11 +1,11 @@
 import React from "react";
 import { FcGoogle } from "react-icons/fc";
-import "./css/Login.css"; // Your custom styles
+import "./css/login.css"; // Your custom styles
 import Footer from "./pageComponents/Footer";
 import Header from "./pageComponents/Header";
 
 const loginWithGoogle = () => {
-  window.location.href = 'http://localhost:8080/api/v1/user/oauth2/authorization/google';
+  window.location.href = 'https://sport-management-app-latest.onrender.com/api/v1/user/oauth2/authorization/google';
 };
 
 const Login = () => {
