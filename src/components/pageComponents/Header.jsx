@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/logo.png'; // Assurez-vous que le chemin est correct
+import logo from '../../assets/dumbbell-solid.svg'; // Assurez-vous que le chemin est correct
 
 function Navbar() {
     const [user, setUser] = useState(null);
