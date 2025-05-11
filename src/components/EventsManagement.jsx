@@ -28,7 +28,7 @@ import {
   Chip
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
-
+import Header from "./pageComponents/Header";
 const API_BASE_URL = 'http://localhost:8080/api/v1/events';
 
 function EventsManagement() {
@@ -55,7 +55,7 @@ function EventsManagement() {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
-    if (userData?.role === 'admin') {
+    if (userData?.role === 'Admin') {
       setIsAdmin(true);
       fetchEvents();
     }
@@ -197,6 +197,8 @@ function EventsManagement() {
   }
 
   return (
+    <>
+       <Header /> 
     <Container maxWidth="lg">
       <Typography variant="h4" gutterBottom>
         Event Management
@@ -210,7 +212,7 @@ function EventsManagement() {
       >
         Create New Event
       </Button>
-      
+
       <Paper elevation={3}>
         <TableContainer>
           <Table>
@@ -249,12 +251,12 @@ function EventsManagement() {
                     </TableCell>
                     <TableCell>{event.location || 'Online'}</TableCell>
                     <TableCell>
-                      <Chip 
-                        label={event.status} 
+                      <Chip
+                        label={event.status}
                         color={
-                          event.status === 'UPCOMING' ? 'warning' : 
-                          event.status === 'ONGOING' ? 'primary' : 'success'
-                        } 
+                          event.status === 'UPCOMING' ? 'warning' :
+                            event.status === 'ONGOING' ? 'primary' : 'success'
+                        }
                       />
                     </TableCell>
                     <TableCell>
@@ -364,15 +366,24 @@ function EventsManagement() {
                 helperText={errors.endDate}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Location"
-                fullWidth
-                name="location"
-                value={currentEvent?.location || newEvent.location}
-                onChange={handleInputChange}
-              />
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth error={!!errors.facility}>
+                <InputLabel>Location</InputLabel>
+                <Select
+                  name="location"
+                  value={currentEvent?.location || newEvent.location}
+                  onChange={handleInputChange}
+                  label="location"
+                >
+                  <MenuItem value="SOCCER_FIELDS">Soccer Fields</MenuItem>
+                  <MenuItem value="BASKETBALL_COURTS">Basketball Courts</MenuItem>
+                  <MenuItem value="SWIMMING_POOLS">Swimming Pools</MenuItem>
+                  <MenuItem value="GYM">Gym</MenuItem>
+                  <MenuItem value="TABLE_TENNIS">Table Tennis</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
+
           </Grid>
         </DialogContent>
         <DialogActions>
@@ -397,6 +408,7 @@ function EventsManagement() {
         </Alert>
       </Snackbar>
     </Container>
+    </>
   );
 }
 

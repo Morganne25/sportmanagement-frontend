@@ -1,0 +1,7 @@
+# ne pas envoyer ces dossiers/fichiers dans le contexte Docker
+node_modules
+build
+.git
+.dockerignore
+Dockerfile
+*.md

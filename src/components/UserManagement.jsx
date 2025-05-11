@@ -10,7 +10,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import Header from './pageComponents/Header';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:8080/api/v1/user';
+const API_BASE_URL = 'https://sport-management-app-latest.onrender.com/api/v1/user';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -28,7 +28,7 @@ function UserManagement() {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
-    if (userData?.role === 'admin') {
+    if (userData?.role === 'Admin') {
       setIsAdmin(true);
       fetchUsers();
     } else {
@@ -113,6 +113,13 @@ function UserManagement() {
     }
   };
 
+
+  const startBooking = () => {
+    if (!isAdmin) return showSnackbar('Only admins can access booking management', 'error');
+    navigate('/booking-management');
+  };
+  
+
   const handleDeleteUser = async (id) => {
     if (!isAdmin) return showSnackbar('Only admins can delete users', 'error');
     if (!window.confirm('Are you sure you want to delete this user?')) return;
@@ -153,255 +160,266 @@ function UserManagement() {
   }
 
   return (
-   <>
+    <>
       <Header />
-    <Container maxWidth="lg">
-    
-      <Typography variant="h4" gutterBottom style={{ margin: '20px 0', color: '#1976d2', textAlign: 'center' }}>
-        User Management
-      </Typography>
+      <Container maxWidth="lg">
 
-      <Box display="flex" justifyContent="space-between" mb={2}>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={() => setOpenAddDialog(true)}
-          disabled={!isAdmin}
-        >
-          Add User
-        </Button>
-        <Button 
-          variant="contained" 
-          color="secondary" 
-          onClick={startEvent}
-        >
-          Event Manager
-        </Button>
-      </Box>
+        <Typography variant="h4" gutterBottom style={{ margin: '20px 0', color: '#1976d2', textAlign: 'center' }}>
+          User Management
+        </Typography>
 
-      <Paper elevation={3}>
-        <TableContainer>
-          <Table>
-            <TableHead style={{ backgroundColor: '#1976d2' }}>
-              <TableRow>
-                <TableCell style={{ color: 'white' }}>ID</TableCell>
-                <TableCell style={{ color: 'white' }}>Name</TableCell>
-                <TableCell style={{ color: 'white' }}>Email</TableCell>
-                <TableCell style={{ color: 'white' }}>Role</TableCell>
-                <TableCell style={{ color: 'white' }}>Status</TableCell>
-                <TableCell style={{ color: 'white' }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <CircularProgress />
-                  </TableCell>
-                </TableRow>
-              ) : users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                users.map(user => (
-                  <TableRow key={user.userid} hover>
-                    <TableCell>{user.userid}</TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>{user.status}</TableCell>
-                    <TableCell>
-                      <IconButton 
-                        color="primary" 
-                        onClick={() => handleEditUser(user)}
-                        aria-label="edit"
-                        disabled={!isAdmin}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton 
-                        color="error" 
-                        onClick={() => handleDeleteUser(user.userid)}
-                        aria-label="delete"
-                        disabled={!isAdmin}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
-      {/* Add User Dialog */}
-      <Dialog open={openAddDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>Add New User</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} style={{ marginTop: '5px' }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={newUser.name}
-                onChange={handleInputChange}
-                error={!!validationErrors.name}
-                helperText={validationErrors.name}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={newUser.email}
-                onChange={handleInputChange}
-                error={!!validationErrors.email}
-                helperText={validationErrors.email}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth error={!!validationErrors.role}>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  name="role"
-                  value={newUser.role}
-                  onChange={handleInputChange}
-                  label="Role"
-                >
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="Facility_staff">Facility staff</MenuItem>
-                  <MenuItem value="resident">Resident</MenuItem>
-                </Select>
-                {validationErrors.role && (
-                  <Typography variant="caption" color="error">
-                    {validationErrors.role}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  name="status"
-                  value={newUser.status}
-                  onChange={handleInputChange}
-                  label="Status"
-                >
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleAddUser} color="primary" variant="contained">
+        <Box display="flex" justifyContent="space-between" mb={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenAddDialog(true)}
+            disabled={!isAdmin}
+          >
             Add User
           </Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* Edit User Dialog */}
-      <Dialog open={openEditDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>Edit User</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} style={{ marginTop: '5px' }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={currentUser?.name || ''}
-                onChange={handleEditInputChange}
-                error={!!validationErrors.name}
-                helperText={validationErrors.name}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={currentUser?.email || ''}
-                onChange={handleEditInputChange}
-                error={!!validationErrors.email}
-                helperText={validationErrors.email}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth error={!!validationErrors.role}>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  name="role"
-                  value={currentUser?.role || ''}
-                  onChange={handleEditInputChange}
-                  label="Role"
-                >
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="Facility_staff">Facility staff</MenuItem>
-                  <MenuItem value="resident">Resident</MenuItem>
-                </Select>
-                {validationErrors.role && (
-                  <Typography variant="caption" color="error">
-                    {validationErrors.role}
-                  </Typography>
+          <Box display="flex" gap={1}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={startEvent}
+            >
+              Event Manager
+            </Button>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={startBooking}
+            >
+              Booking Manager
+            </Button>
+          </Box>
+        </Box>
+
+
+        <Paper elevation={3}>
+          <TableContainer>
+            <Table>
+              <TableHead style={{ backgroundColor: '#1976d2' }}>
+                <TableRow>
+                  <TableCell style={{ color: 'white' }}>ID</TableCell>
+                  <TableCell style={{ color: 'white' }}>Name</TableCell>
+                  <TableCell style={{ color: 'white' }}>Email</TableCell>
+                  <TableCell style={{ color: 'white' }}>Role</TableCell>
+                  <TableCell style={{ color: 'white' }}>Status</TableCell>
+                  <TableCell style={{ color: 'white' }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      No users found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map(user => (
+                    <TableRow key={user.userid} hover>
+                      <TableCell>{user.userid}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.role}</TableCell>
+                      <TableCell>{user.status}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEditUser(user)}
+                          aria-label="edit"
+                          disabled={!isAdmin}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteUser(user.userid)}
+                          aria-label="delete"
+                          disabled={!isAdmin}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  name="status"
-                  value={currentUser?.status || ''}
-                  onChange={handleEditInputChange}
-                  label="Status"
-                >
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleUpdateUser} color="primary" variant="contained">
-            Save Changes
-          </Button>
-        </DialogActions>
-      </Dialog>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert
+        {/* Add User Dialog */}
+        <Dialog open={openAddDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+          <DialogTitle>Add New User</DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} style={{ marginTop: '5px' }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={newUser.name}
+                  onChange={handleInputChange}
+                  error={!!validationErrors.name}
+                  helperText={validationErrors.name}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={newUser.email}
+                  onChange={handleInputChange}
+                  error={!!validationErrors.email}
+                  helperText={validationErrors.email}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth error={!!validationErrors.role}>
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    name="role"
+                    value={newUser.role}
+                    onChange={handleInputChange}
+                    label="Role"
+                  >
+                    <MenuItem value="Admin">Admin</MenuItem>
+                    <MenuItem value="Facility_staff">Facility staff</MenuItem>
+                    <MenuItem value="resident">Resident</MenuItem>
+                  </Select>
+                  {validationErrors.role && (
+                    <Typography variant="caption" color="error">
+                      {validationErrors.role}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    name="status"
+                    value={newUser.status}
+                    onChange={handleInputChange}
+                    label="Status"
+                  >
+                    <MenuItem value="active">Active</MenuItem>
+                    <MenuItem value="inactive">Inactive</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleAddUser} color="primary" variant="contained">
+              Add User
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={openEditDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+          <DialogTitle>Edit User</DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} style={{ marginTop: '5px' }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={currentUser?.name || ''}
+                  onChange={handleEditInputChange}
+                  error={!!validationErrors.name}
+                  helperText={validationErrors.name}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={currentUser?.email || ''}
+                  onChange={handleEditInputChange}
+                  error={!!validationErrors.email}
+                  helperText={validationErrors.email}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth error={!!validationErrors.role}>
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    name="role"
+                    value={currentUser?.role || ''}
+                    onChange={handleEditInputChange}
+                    label="Role"
+                  >
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="Facility_staff">Facility staff</MenuItem>
+                    <MenuItem value="resident">Resident</MenuItem>
+                  </Select>
+                  {validationErrors.role && (
+                    <Typography variant="caption" color="error">
+                      {validationErrors.role}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    name="status"
+                    value={currentUser?.status || ''}
+                    onChange={handleEditInputChange}
+                    label="Status"
+                  >
+                    <MenuItem value="active">Active</MenuItem>
+                    <MenuItem value="inactive">Inactive</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleUpdateUser} color="primary" variant="contained">
+              Save Changes
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
           onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          sx={{ width: '100%' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Container>
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </Container>
     </>
   );
 

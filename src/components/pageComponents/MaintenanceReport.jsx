@@ -1,196 +1,230 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  Box, Button, TextField, Paper, Typography, Snackbar, Alert,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+  FormControl, InputLabel, Select, MenuItem
+} from '@mui/material';
+import { Comment, Delete } from '@mui/icons-material';
 import axios from 'axios';
-import './updates.css';
-import { CircularProgress, Chip, Button } from '@mui/material';
-import { CalendarToday, LocationOn, Schedule, Construction } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-function Updates() {
-  const [events, setEvents] = useState([]);
-  const [maintenanceReports, setMaintenanceReports] = useState([]);
-  const [loading, setLoading] = useState({ events: true, maintenance: true });
-  const [error, setError] = useState({ events: null, maintenance: null });
+const MaintenanceReport = () => {
+  const [reports, setReports] = useState([]);
+  const [description, setDescription] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [currentReport, setCurrentReport] = useState(null);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+
   const navigate = useNavigate();
+  const apiBase = 'http://localhost:8080/api/v1/maintenance';
+  const statusOptions = ['Open', 'In Progress', 'Completed' ];
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch events
-        const eventsResponse = await axios.get('http://localhost:8080/api/v1/events');
-        const sortedEvents = eventsResponse.data
-          .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
-          .filter(event => event.status === 'UPCOMING');
-        setEvents(sortedEvents);
-        setLoading(prev => ({ ...prev, events: false }));
-      } catch (err) {
-        setError(prev => ({ ...prev, events: 'Failed to fetch events' }));
-        setLoading(prev => ({ ...prev, events: false }));
-      }
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    if (!userData) {
+      navigate('/login');
+    } else {
+      setUser(userData);
+    }
+  }, [navigate]);
 
-      try {
-        // Fetch maintenance reports (only in-progress and upcoming)
-        const maintenanceResponse = await axios.get('http://localhost:8080/api/v1/maintenance');
-        const relevantReports = maintenanceResponse.data
-          .filter(report => ['In Progress', 'Open'].includes(report.status))
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setMaintenanceReports(relevantReports);
-        setLoading(prev => ({ ...prev, maintenance: false }));
-      } catch (err) {
-        setError(prev => ({ ...prev, maintenance: 'Failed to fetch maintenance reports' }));
-        setLoading(prev => ({ ...prev, maintenance: false }));
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const formatDate = (dateString) => {
-    const options = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(apiBase);
+      const allReports = res.data || [];
+      const visibleReports = user.role === 'Admin'
+        ? allReports
+        : allReports.filter(r => r.createdBy === user.id);
+      setReports(visibleReports);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch reports.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleViewAllEvents = () => navigate('/events');
-  const handleViewAllMaintenance = () => navigate('/maintenance');
+  useEffect(() => {
+    if (user) fetchReports();
+  }, [user]);
 
-  // Get only the first 3 upcoming events and maintenance reports
-  const latestEvents = events.slice(0, 3);
-  const latestMaintenance = maintenanceReports.slice(0, 3);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${apiBase}?email=${user.email}`, {
+        description,
+        status: 'Open'
+      });
+      setReports(prev => [...prev, res.data]);
+      setDescription('');
+      setSuccess("Report submitted successfully!");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to submit report.");
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const res = await axios.put(`${apiBase}/${id}/status?email=${user.email}`, {
+        status: newStatus
+      });
+      setReports(reports.map(r => r.id === id ? res.data : r));
+      setSuccess("Status updated!");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update status.");
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
+    try {
+      const res = await axios.put(`${apiBase}/${currentReport.id}/feedback?email=${user.email}`, {
+        feedback
+      });
+      setReports(reports.map(r => r.id === currentReport.id ? res.data : r));
+      setFeedback('');
+      setCurrentReport(null);
+      setFeedbackDialogOpen(false);
+      setSuccess("Feedback added!");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to add feedback.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${apiBase}/${id}`);
+      setReports(reports.filter(r => r.id !== id));
+      setSuccess("Report deleted.");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete report.");
+    }
+  };
+
+  if (!user) return <Typography>Loading user data...</Typography>;
 
   return (
-    <div className="updates">
-      <h1>Updates</h1>
-      <div className="notification-container">
-        <div className="notification-item events-section">
-          <div className="section-header">
-            <h4>Upcoming Events</h4>
-            {events.length > 3 && (
-              <Button 
-                variant="outlined" 
-                size="small"
-                onClick={handleViewAllEvents}
-                className="view-all-btn"
-              >
-                View All Events
-              </Button>
-            )}
-          </div>
-          {loading.events ? (
-            <div className="loading-container">
-              <CircularProgress size={24} />
-              <p>Loading events...</p>
-            </div>
-          ) : error.events ? (
-            <p className="error-message">{error.events}</p>
-          ) : latestEvents.length === 0 ? (
-            <p className="no-events">No upcoming events scheduled</p>
-          ) : (
-            <div className="events-list">
-              {latestEvents.map((event) => (
-                <div key={event.id} className="event-card">
-                  <div className="event-header">
-                    <h5>{event.title}</h5>
-                    <Chip 
-                      label={event.status} 
-                      size="small"
-                      color="warning"
-                    />
-                  </div>
-                  <p className="event-description">{event.description}</p>
-                  <div className="event-details">
-                    <div className="detail-item">
-                      <CalendarToday fontSize="small" />
-                      <span>{formatDate(event.startDate)}</span>
-                    </div>
-                    {event.endDate && (
-                      <div className="detail-item">
-                        <Schedule fontSize="small" />
-                        <span>Ends: {formatDate(event.endDate)}</span>
-                      </div>
-                    )}
-                    {event.location && (
-                      <div className="detail-item">
-                        <LocationOn fontSize="small" />
-                        <span>{event.location}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="event-type">
-                    <Chip label={event.eventType} color="primary" size="small" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+    <Box sx={{ p: 4 }}>
+      {/* Alerts */}
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError('')}>
+        <Alert severity="error">{error}</Alert>
+      </Snackbar>
+      <Snackbar open={!!success} autoHideDuration={6000} onClose={() => setSuccess('')}>
+        <Alert severity="success">{success}</Alert>
+      </Snackbar>
 
-        <div className="notification-item maintenance-section">
-          <div className="section-header">
-            <h4>Planned Maintenance</h4>
-            {maintenanceReports.length > 3 && (
-              <Button 
-                variant="outlined" 
-                size="small"
-                onClick={handleViewAllMaintenance}
-                className="view-all-btn"
-              >
-                View All Reports
-              </Button>
-            )}
-          </div>
-          {loading.maintenance ? (
-            <div className="loading-container">
-              <CircularProgress size={24} />
-              <p>Loading maintenance reports...</p>
-            </div>
-          ) : error.maintenance ? (
-            <p className="error-message">{error.maintenance}</p>
-          ) : latestMaintenance.length === 0 ? (
-            <p className="no-events">No planned maintenance</p>
-          ) : (
-            <div className="maintenance-list">
-              {latestMaintenance.map((report) => (
-                <div key={report.id} className="maintenance-card">
-                  <div className="maintenance-header">
-                    <h5>Maintenance Report</h5>
-                    <Chip 
-                      label={report.status} 
-                      size="small"
-                      color={report.status === 'In Progress' ? 'primary' : 'warning'}
-                    />
-                  </div>
-                  <p className="maintenance-description">{report.description}</p>
-                  <div className="maintenance-details">
-                    <div className="detail-item">
-                      <Construction fontSize="small" />
-                      <span>Reported: {formatDate(report.createdAt)}</span>
-                    </div>
-                    {report.feedback && (
-                      <div className="detail-item">
-                        <span>Feedback: {report.feedback}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* New Report Form */}
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6">New Report</Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Describe the issue"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            fullWidth
+            multiline
+            rows={4}
+            required
+            sx={{ my: 2 }}
+          />
+          <Button variant="contained" type="submit" disabled={loading}>
+            {loading ? "Submitting..." : "Submit"}
+          </Button>
+        </form>
+      </Paper>
 
-        <div className="notification-item">
-          <h4>Facility Availability</h4>
-          <p className='notification-description'>
-            <a href="">Check Availability</a>
-          </p>
-        </div>
-      </div>
-    </div>
+      {/* Reports Table */}
+      <Typography variant="h6" gutterBottom>Report List</Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Date</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Feedback</TableCell>
+              {user.role === 'Admin' && <TableCell>Actions</TableCell>}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">Loading...</TableCell>
+              </TableRow>
+            ) : reports.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">No reports found.</TableCell>
+              </TableRow>
+            ) : (
+              reports.map(report => (
+                <TableRow key={report.id}>
+                  <TableCell>{report.createdAt ? new Date(report.createdAt).toLocaleDateString() : '—'}</TableCell>
+                  <TableCell>{report.description || '—'}</TableCell>
+                  <TableCell>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={report.status}
+                        onChange={(e) => handleStatusChange(report.id, e.target.value)}
+                        disabled={report.status === 'Completed' && user.role !== 'Admin'}
+                      >
+                        {statusOptions.map(status => (
+                          <MenuItem key={status} value={status}>{status}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </TableCell>
+                  <TableCell>{report.feedback || '—'}</TableCell>
+                  {user.role === 'Admin' && (
+                    <TableCell>
+                      <IconButton onClick={() => {
+                        setCurrentReport(report);
+                        setFeedback(report.feedback || '');
+                        setFeedbackDialogOpen(true);
+                      }}>
+                        <Comment color="primary" />
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(report.id)}>
+                        <Delete color="error" />
+                      </IconButton>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Feedback Dialog */}
+      <Dialog open={feedbackDialogOpen} onClose={() => setFeedbackDialogOpen(false)}>
+        <DialogTitle>Add Feedback</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Feedback"
+            fullWidth
+            multiline
+            rows={4}
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFeedbackDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleFeedbackSubmit} variant="contained">Submit</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
-}
+};
 
-export default Updates;
+export default MaintenanceReport;

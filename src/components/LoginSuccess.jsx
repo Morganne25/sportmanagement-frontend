@@ -10,6 +10,7 @@ const LoginSuccess = () => {
     const userId = searchParams.get("userId");
     const email = searchParams.get("email");
     const role = searchParams.get("role");
+    const name = searchParams.get("name");
 
     if (token) {
       // Save individual values
@@ -17,12 +18,14 @@ const LoginSuccess = () => {
       localStorage.setItem("userId", userId);
       localStorage.setItem("email", email);
       localStorage.setItem("role", role);
+      localStorage.setItem("name", name);
 
       // ✅ BONUS: Save the entire user as an object
       const userData = {
         token,
         userId,
         email,
+        name,
         role,
         welcomeMessage: `Welcome back, ${email.split('@')[0]}!`, // Bonus message
         loginTime: new Date().toISOString(),

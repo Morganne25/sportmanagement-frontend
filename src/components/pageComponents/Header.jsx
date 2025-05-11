@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png'; // Assurez-vous que le chemin est correct
 
 function Navbar() {
     const [user, setUser] = useState(null);
@@ -18,22 +19,20 @@ function Navbar() {
 
     return (
         <header className="header">
-            <h1><a href="/">APP</a></h1>
+            <a href="/">
+                <img src={logo} alt="App Logo" style={{ width: '105px' }} />
+            </a>
             <nav className="navbar">
                 <ul>
-                    {/* Afficher seulement pour les admins */}
                     {user?.role === 'Admin' && (
                         <li><a href="/management">Admin management</a></li>
                     )}
                     <li><a href="/Dashboard">Dashboard</a></li>
                     <li><a href="/report">Maintenance Report</a></li>
-                    <li><a href="/about">About</a></li>
+                    <li><a href="/aboutPage">About</a></li>
 
                     {!user ? (
-                        <>
-                            <li><a href="/login">Login</a></li>
-                            <li><a href="/login">Log In</a></li>
-                        </>
+                        <li><a href="/login">Login</a></li>
                     ) : (
                         <>
                             <li><a href="#" onClick={handleLogout}>Logout</a></li>

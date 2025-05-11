@@ -3,7 +3,7 @@ import axios from 'axios';
 import './updates.css';
 import { CircularProgress, Chip, Button } from '@mui/material';
 import { CalendarToday, LocationOn, Schedule } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Updates() {
   const [events, setEvents] = useState([]);
@@ -117,18 +117,19 @@ function Updates() {
         </div>
 
         <div className="notification-item">
-          <h4>Planned Maintenance</h4>
+          <h4>&#9748; Weather Enquiry</h4>
           <p className='notification-description'>
-            Show planned maintenance updates
+            <Link to="/weather">Check the forecast</Link>
           </p>
         </div>
 
-        <div className="notification-item">
+
+        {/* <div className="notification-item">
           <h4>Facility Availability</h4>
           <p className='notification-description'>
             <a href="">Check Availability</a>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

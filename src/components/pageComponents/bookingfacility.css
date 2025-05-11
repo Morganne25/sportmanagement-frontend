@@ -1,0 +1,24 @@
+.calendar {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .day {
+    width: 100px;
+    margin: 5px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .available {
+    background-color: #d4fcd2;
+  }
+  .unavailable {
+    background-color: #f8d7da;
+    cursor: not-allowed;
+  }
+  .confirm-booking {
+    margin: 20px 0;
+  }
+  

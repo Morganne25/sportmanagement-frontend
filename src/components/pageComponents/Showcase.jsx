@@ -1,51 +1,69 @@
-import React from 'react'
-import Updates from './Updates'
-import './showcase.css'
+// src/components/Showcase.jsx
+import React from 'react';
+import Updates from './Updates';
+import './showcase.css';
+import { useNavigate } from 'react-router-dom';
+
+const facilities = [
+  {
+    key: 'soccer',
+    name: 'Soccer Fields',
+    description: 'We have 2 soccer fields available for rent. Each field is 100 yards long and 50 yards wide.',
+    icon: 'src/assets/futbol-regular.svg'
+  },
+  {
+    key: 'basketball',
+    name: 'Basketball Courts',
+    description: 'We have 2 basketball courts available for rent. Each court is 94 feet long.',
+    icon: 'src/assets/basketball-solid.svg'
+  },
+  {
+    key: 'swimming',
+    name: 'Swimming Pools',
+    description: 'We have 2 swimming pools available for rent. Each pool is 25 yards long.',
+    icon: 'src/assets/person-swimming-solid.svg'
+  },
+  {
+    key: 'gym',
+    name: 'Gym',
+    description: 'We have a fully equipped gym available for rent. Our gym has a variety of equipment.',
+    icon: 'src/assets/dumbbell-solid.svg'
+  },
+  {
+    key: 'table-tennis',
+    name: 'Table Tennis',
+    description: 'We have 2 table tennis tables available for rent. Each table is 9 feet long.',
+    icon: 'src/assets/table-tennis-paddle-ball-solid.svg'
+  }
+];
 
 function Showcase() {
-    return(
-        <div className="showcase">
-            <h1>Our Services</h1>
-            <div className="services-container">
-                <div className="service-item">
-                    <img className="icon" src="src\assets\futbol-regular.svg" alt="Soccer" />
-                    <h4>Soccer Fields</h4>
-                    <p className='service-description'>
-                        We have 2 soccer fields available for rent. Each field is 100 yards long and 50
-                    </p>
-                </div>
-                <div className="service-item">
-                    <img className="icon" src="src\assets\basketball-solid.svg" alt="Basketball" />
-                    <h4>Basketball Courts</h4>
-                    <p className='service-description'>
-                        We have 2 basketball courts available for rent. Each court is 94 feet long and
-                    </p>
-                </div>
-                <div className="service-item">
-                    <img className="icon" src="src\assets\person-swimming-solid.svg" alt="Swimming" />
-                    <h4>Swimming Pools</h4>
-                    <p className='service-description'>
-                        We have 2 swimming pools available for rent. Each pool is 25 yards long and
-                    </p>
-                </div>
-                <div className="service-item">
-                    <img className="icon" src="src\assets\dumbbell-solid.svg" alt="Gym" />
-                    <h4>Gym</h4>
-                    <p className='service-description'>
-                        We have a fully equipped gym available for rent. Our gym has a variety of equipment
-                    </p>
-                </div>
-                <div className="service-item">
-                    <img className="icon" src="src\assets\table-tennis-paddle-ball-solid.svg" alt="Swimming" />
-                    <h4>Table Tennis</h4>
-                    <p className='service-description'>
-                        We have 2 table tennis tables available for rent. Each table is 9 feet long and
-                    </p>
-                </div>
-            </div>
-            <Updates/>
-        </div>
-    )
+  const navigate = useNavigate();
+
+  const handleClick = (facilityKey) => {
+    navigate(`/booking/${facilityKey}`);
+  };
+
+  return (
+    <div className="showcase">
+      <h1>Our Services</h1>
+      <div className="services-container">
+        {facilities.map((facility) => (
+          <div
+            key={facility.key}
+            className="service-item"
+            onClick={() => handleClick(facility.key)}
+            style={{ cursor: 'pointer' }}
+          >
+            <img className="icon" src={facility.icon} alt={facility.name} />
+            <h4>{facility.name}</h4>
+            <p className="service-description">{facility.description}</p>
+          </div>
+        ))}
+      </div>
+      <Updates />
+    </div>
+  );
 }
 
-export default Showcase
+export default Showcase;
