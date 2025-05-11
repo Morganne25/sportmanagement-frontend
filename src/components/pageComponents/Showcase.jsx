@@ -9,7 +9,7 @@ const facilities = [
     key: 'soccer',
     name: 'Soccer Fields',
     description: 'We have 2 soccer fields available for rent. Each field is 100 yards long and 50 yards wide.',
-    icon: './src/assets/futbol-regular.svg'
+    icon: './src/assets/logo.png'
   },
   {
     key: 'basketball',
