@@ -1,6 +1,6 @@
 import React from "react";
 import { FcGoogle } from "react-icons/fc";
-import "./css/login.css";
+import "./css/Login.css";
 import Footer from "./pageComponents/Footer";
 import Header from "./pageComponents/Header";
 
