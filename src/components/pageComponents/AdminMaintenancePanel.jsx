@@ -15,7 +15,7 @@ import {
 import axios from 'axios';
 import moment from 'moment';
 
-const apiBaseUrl = 'https://sport-management-app-latest.onrender.com';
+const apiBaseUrl = 'http://localhost:8080';
 
 const AdminMaintenancePanel = () => {
   const [bookings, setBookings] = useState([]);

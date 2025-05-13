@@ -5,7 +5,7 @@ import Footer from "./pageComponents/Footer";
 import Header from "./pageComponents/Header";
 
 const loginWithGoogle = () => {
-  window.location.href = 'https://sport-management-app-latest.onrender.com/api/v1/user/oauth2/authorization/google';
+  window.location.href = 'http://localhost:8080/api/v1/user/oauth2/authorization/google';
 };
 
 const Login = () => {

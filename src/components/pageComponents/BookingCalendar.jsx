@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 
 const localizer = momentLocalizer(moment);
-const apiBaseUrl = 'https://sport-management-app-latest.onrender.com';
+const apiBaseUrl = 'http://localhost:8080';
 
 const STATUS_COLORS = {
   approved: '#4CAF50',

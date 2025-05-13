@@ -10,7 +10,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import Header from './pageComponents/Header';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'https://sport-management-app-latest.onrender.com/api/v1/user';
+const API_BASE_URL = 'http://localhost:8080/api/v1/user';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
