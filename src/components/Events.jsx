@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './css/event.css';
 import { CircularProgress, Chip } from '@mui/material';
 import { CalendarToday, LocationOn, Schedule } from '@mui/icons-material';
 import Header from "./pageComponents/Header";
@@ -40,45 +39,45 @@ function Events() {
   return (
     <>
         <Header/>
-        <div className="all-events">
-        <h1>All Events</h1>
+    <div className="container py-4">
+        <h1 className="mb-4 text-primary">All Events</h1>
         {loading ? (
-            <div className="loading-container">
+            <div className="d-flex align-items-center gap-2 text-muted">
             <CircularProgress size={24} />
-            <p>Loading events...</p>
+            <p className="mb-0">Loading events...</p>
             </div>
         ) : error ? (
-            <p className="error-message">{error}</p>
+            <p className="text-danger">{error}</p>
         ) : events.length === 0 ? (
-            <p className="no-events">No events available</p>
+            <p className="fst-italic text-muted">No events available</p>
         ) : (
-            <div className="events-list">
+            <div className="d-flex flex-column gap-3">
             {events.map((event) => (
-                <div key={event.id} className="event-card">
-                <div className="event-header">
-                    <h5>{event.title}</h5>
+                <div key={event.id} className="card shadow-sm p-3 transition-hover">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h5 className="mb-0 text-primary">{event.title}</h5>
                     <Chip label={event.status} size="small" color="warning" />
                 </div>
-                <p className="event-description">{event.description}</p>
-                <div className="event-details">
-                    <div className="detail-item">
+                <p className="text-muted mb-2 small">{event.description}</p>
+                <div className="d-flex flex-column gap-2 mt-3 text-secondary small">
+                    <div className="d-flex align-items-center gap-2">
                     <CalendarToday fontSize="small" />
                     <span>{formatDate(event.startDate)}</span>
                     </div>
                     {event.endDate && (
-                    <div className="detail-item">
+                    <div className="d-flex align-items-center gap-2">
                         <Schedule fontSize="small" />
                         <span>Ends: {formatDate(event.endDate)}</span>
                     </div>
                     )}
                     {event.location && (
-                    <div className="detail-item">
+                    <div className="d-flex align-items-center gap-2">
                         <LocationOn fontSize="small" />
                         <span>{event.location}</span>
                     </div>
                     )}
                 </div>
-                <div className="event-type">
+                <div className="mt-2">
                     <Chip label={event.eventType} color="primary" size="small" />
                 </div>
                 </div>

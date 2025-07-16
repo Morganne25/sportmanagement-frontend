@@ -1,8 +1,8 @@
 // src/components/Showcase.jsx
 import React from 'react';
 import Updates from './Updates';
-import './showcase.css';
 import { useNavigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Import icons as modules so they work globally
 import soccerIcon from '../../assets/futbol-regular.svg';
@@ -52,19 +52,40 @@ function Showcase() {
   };
 
   return (
-    <div className="showcase">
-      <h1>Our Services</h1>
-      <div className="services-container">
+    <div className="container my-5" style={{ backgroundColor: 'hsl(0, 13%, 9%)', color: 'white', textAlign: 'center', padding: '40px 20px', borderRadius: '12px' }}>
+      <h1 className="mb-4" style={{ color: 'white' }}>Our Services</h1>
+      <div className="row justify-content-center" style={{ gap: '24px', marginTop: '30px' }}>
         {facilities.map((facility) => (
           <div
             key={facility.key}
-            className="service-item"
+            className="col-md-4 mb-4"
             onClick={() => handleClick(facility.key)}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', minWidth: '260px' }}
           >
-            <img className="icon" src={facility.icon} alt={facility.name} />
-            <h4>{facility.name}</h4>
-            <p className="service-description">{facility.description}</p>
+            <div className="card h-100" style={{ backgroundColor: 'hsl(0, 9%, 15%)', border: '1px solid hsl(31, 70%, 40%)', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 6px rgba(0,0,0,0.2)', transition: 'all 0.3s ease' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)';
+                e.currentTarget.style.backgroundColor = 'hsl(0, 0%, 12%)';
+                e.currentTarget.style.borderColor = 'hsl(0, 0%, 87%)';
+                e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.3)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.backgroundColor = 'hsl(0, 9%, 15%)';
+                e.currentTarget.style.borderColor = 'hsl(31, 70%, 40%)';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+              }}
+            >
+              <div className="card-body d-flex flex-column align-items-center justify-content-center">
+                <img
+                  src={facility.icon}
+                  alt={facility.name}
+                  style={{ width: '100px', height: '100px', objectFit: 'contain', filter: 'invert(100%)', marginBottom: '12px' }}
+                />
+                <h5 className="card-title" style={{ fontSize: '1.6em', marginBottom: '10px', color: 'hsl(31, 70%, 50%)' }}>{facility.name}</h5>
+                <p className="card-text" style={{ fontSize: '16px', color: 'hsl(31, 70%, 80%)' }}>{facility.description}</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>
